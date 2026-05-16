@@ -25,36 +25,28 @@
     background: var(--gray-50); color: var(--gray-900);
     padding-top: calc(56px + var(--safe-top));
     padding-bottom: calc(64px + var(--safe-bottom)); }
-
-  /* Top bar */
   .topbar { position: fixed; top: 0; left: 0; right: 0;
     height: calc(56px + var(--safe-top)); padding-top: var(--safe-top);
     background: white; border-bottom: 1px solid var(--gray-200);
-    display: flex; align-items: center; padding-left: 16px; padding-right: 16px;
-    z-index: 100; }
+    display: flex; align-items: center; padding: var(--safe-top) 16px 0;
+    z-index: 100; gap: 10px; }
   .topbar h1 { font-size: 18px; font-weight: 600; flex: 1; }
   .topbar .status { font-size: 12px; color: var(--gray-400); display: flex; align-items: center; gap: 4px; }
-  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gray-400); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gray-400); flex-shrink: 0; }
   .dot.live { background: var(--green); animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-  /* Bottom nav */
   .bottomnav { position: fixed; bottom: 0; left: 0; right: 0;
     height: calc(56px + var(--safe-bottom)); padding-bottom: var(--safe-bottom);
     background: white; border-top: 1px solid var(--gray-200);
     display: flex; z-index: 100; }
   .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center;
     justify-content: center; gap: 3px; border: none; background: none;
-    font-size: 11px; color: var(--gray-400); cursor: pointer; padding-top: 8px; }
+    font-size: 10px; color: var(--gray-400); cursor: pointer; padding-top: 8px; }
   .nav-btn.active { color: var(--blue); }
   .nav-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none;
     stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-
-  /* Pages */
   .page { display: none; padding: 12px; }
   .page.active { display: block; }
-
-  /* Camera grid */
   .cam-scroll { display: flex; gap: 8px; overflow-x: auto; padding: 0 0 8px;
     scrollbar-width: none; -webkit-overflow-scrolling: touch; }
   .cam-scroll::-webkit-scrollbar { display: none; }
@@ -62,23 +54,20 @@
     font-weight: 500; border: 1.5px solid var(--gray-200); background: white;
     color: var(--gray-600); cursor: pointer; white-space: nowrap; }
   .cam-chip.active { background: var(--blue-light); color: var(--blue); border-color: var(--blue); }
-
   .cam-card { background: white; border-radius: var(--radius); overflow: hidden;
     margin-top: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-  .cam-card img { width: 100%; display: block; min-height: 180px; background: var(--gray-100);
-    object-fit: cover; }
+  .cam-card img { width: 100%; display: block; min-height: 180px;
+    background: var(--gray-100); object-fit: cover; }
   .cam-info { padding: 10px 14px 12px; display: flex; justify-content: space-between; align-items: center; }
   .cam-name { font-size: 14px; font-weight: 600; }
-  .cam-alt { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
+  .cam-alt  { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
   .cam-badge { font-size: 12px; font-weight: 600; padding: 4px 10px;
     border-radius: 20px; background: var(--blue-light); color: var(--blue); }
-
-  .refresh-btn { width: 100%; margin-top: 10px; padding: 12px;
+  .btn-primary { width: 100%; margin-top: 10px; padding: 12px;
     background: var(--blue); color: white; border: none; border-radius: var(--radius-sm);
     font-size: 15px; font-weight: 500; cursor: pointer; }
-  .refresh-btn:active { background: var(--blue-dark); }
-
-  /* Stats page */
+  .btn-primary:active { background: var(--blue-dark); }
+  .btn-primary:disabled { opacity: 0.5; cursor: default; }
   .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
   .metric-card { background: white; border-radius: var(--radius); padding: 14px 16px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
@@ -87,46 +76,47 @@
   .metric-value.melt { color: var(--red); }
   .metric-value.stable { color: var(--gray-600); }
   .metric-value.snow { color: var(--blue); }
-
   .chart-card { background: white; border-radius: var(--radius); padding: 14px 16px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 12px; }
   .chart-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
   .chart-wrap { position: relative; height: 180px; }
-
   .log-card { background: white; border-radius: var(--radius); padding: 0;
     box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow: hidden; }
   .log-row { display: flex; justify-content: space-between; padding: 10px 16px;
     border-bottom: 1px solid var(--gray-100); font-size: 13px; align-items: center; }
   .log-row:last-child { border-bottom: none; }
   .log-time { color: var(--gray-400); font-size: 12px; }
-  .log-cam { font-weight: 500; }
-  .log-white { font-weight: 600; }
+  .log-cam  { font-weight: 500; }
   .log-delta { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
-  .delta-melt { background: var(--red-light); color: var(--red); }
-  .delta-snow { background: var(--blue-light); color: var(--blue); }
+  .delta-melt   { background: var(--red-light); color: var(--red); }
+  .delta-snow   { background: var(--blue-light); color: var(--blue); }
   .delta-stable { background: var(--gray-100); color: var(--gray-600); }
-
   .section-title { font-size: 13px; font-weight: 600; color: var(--gray-400);
     text-transform: uppercase; letter-spacing: 0.5px; margin: 16px 0 8px; }
-
   .auto-row { background: white; border-radius: var(--radius); padding: 14px 16px;
     display: flex; justify-content: space-between; align-items: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 8px; }
   .auto-label { font-size: 14px; font-weight: 500; }
-  .auto-sub { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
-  .toggle { width: 44px; height: 26px; border-radius: 13px; background: var(--gray-200);
-    position: relative; cursor: pointer; transition: background 0.2s; border: none; }
-  .toggle.on { background: var(--blue); }
-  .toggle::after { content: ''; position: absolute; width: 20px; height: 20px;
-    border-radius: 50%; background: white; top: 3px; left: 3px;
-    transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-  .toggle.on::after { transform: translateX(18px); }
-
+  .auto-sub   { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
+  .tl-controls { background: white; border-radius: var(--radius); padding: 14px 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 12px; }
+  .tl-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .tl-row:last-child { margin-bottom: 0; }
+  .tl-label { font-size: 14px; color: var(--gray-600); }
+  .tl-select { padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid var(--gray-200);
+    font-size: 14px; background: var(--gray-50); color: var(--gray-900); }
+  .tl-gif-wrap { background: white; border-radius: var(--radius); overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 12px; text-align: center;
+    min-height: 120px; display: flex; align-items: center; justify-content: center; }
+  .tl-gif-wrap img { width: 100%; display: block; }
+  .tl-placeholder { color: var(--gray-400); font-size: 14px; padding: 40px 20px; line-height: 1.6; }
+  .tl-info { font-size: 12px; color: var(--gray-400); text-align: center; margin-bottom: 10px; }
   .empty { text-align: center; padding: 40px 20px; color: var(--gray-400); font-size: 14px; }
+  .badge-pill { display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-size: 12px; font-weight: 600; background: var(--green-light); color: var(--green); }
 </style>
 </head>
 <body>
-
 <div class="topbar">
   <h1>🏔 Nozawa Cams</h1>
   <div class="status">
@@ -134,64 +124,94 @@
     <span id="status-text">Loading…</span>
   </div>
 </div>
-
-<!-- CAMS PAGE -->
 <div class="page active" id="page-cams">
   <div class="cam-scroll" id="cam-chips"></div>
   <div class="cam-card">
-    <img id="cam-img" src="" alt="Webcam"/>
+    <img id="cam-img" src="" alt="Webcam snapshot"/>
     <div class="cam-info">
       <div>
         <div class="cam-name" id="cam-name">—</div>
-        <div class="cam-alt" id="cam-alt">—</div>
+        <div class="cam-alt"  id="cam-alt">—</div>
       </div>
       <div class="cam-badge" id="cam-white">—</div>
     </div>
   </div>
   <div style="font-size:12px; color:var(--gray-400); text-align:center; margin-top:6px;" id="cam-ts">—</div>
-  <button class="refresh-btn" onclick="refreshCam()">↻ Refresh</button>
+  <button class="btn-primary" onclick="refreshCam()">↻ Refresh</button>
 </div>
-
-<!-- STATS PAGE -->
 <div class="page" id="page-stats">
   <div class="metrics-grid">
     <div class="metric-card"><div class="metric-label">Latest whiteness</div><div class="metric-value" id="s-white">—</div></div>
     <div class="metric-card"><div class="metric-label">Snapshots</div><div class="metric-value" id="s-count">0</div></div>
-    <div class="metric-card"><div class="metric-label">24h trend</div><div class="metric-value" id="s-trend">—</div></div>
-    <div class="metric-card"><div class="metric-label">Next capture</div><div class="metric-value" id="s-next" style="font-size:16px; padding-top:4px;">—</div></div>
+    <div class="metric-card"><div class="metric-label">Melt trend</div><div class="metric-value" id="s-trend">—</div></div>
+    <div class="metric-card"><div class="metric-label">Next capture</div><div class="metric-value" id="s-next" style="font-size:16px;padding-top:4px;">—</div></div>
   </div>
-
   <div class="chart-card">
     <div class="chart-title">Snow whiteness over time</div>
     <div class="chart-wrap"><canvas id="chart"></canvas></div>
   </div>
-
   <div class="section-title">Recent snapshots</div>
-  <div class="log-card" id="log-list"><div class="empty">No data yet — tap Refresh on the Cams tab</div></div>
+  <div class="log-card" id="log-list"><div class="empty">No data yet</div></div>
 </div>
-
-<!-- SETTINGS PAGE -->
+<div class="page" id="page-timelapse">
+  <div class="section-title" style="margin-top:4px;">Generate timelapse</div>
+  <div class="tl-controls">
+    <div class="tl-row">
+      <span class="tl-label">Camera</span>
+      <select class="tl-select" id="tl-cam"></select>
+    </div>
+    <div class="tl-row">
+      <span class="tl-label">Time range</span>
+      <select class="tl-select" id="tl-days">
+        <option value="1">Last 24 hours</option>
+        <option value="2">Last 2 days</option>
+        <option value="3">Last 3 days</option>
+        <option value="7">Last 7 days</option>
+      </select>
+    </div>
+    <div class="tl-row">
+      <span class="tl-label">Speed</span>
+      <select class="tl-select" id="tl-fps">
+        <option value="4">Slow (4fps)</option>
+        <option value="8" selected>Normal (8fps)</option>
+        <option value="12">Fast (12fps)</option>
+      </select>
+    </div>
+  </div>
+  <div class="tl-info" id="tl-frame-count">Checking frames…</div>
+  <div class="tl-gif-wrap" id="tl-gif-wrap">
+    <div class="tl-placeholder">Select options above and tap Generate to build your timelapse.<br><br>The app captures a frame every 30 minutes — after a few hours you'll have enough for a nice timelapse.</div>
+  </div>
+  <button class="btn-primary" id="tl-btn" onclick="generateTimelapse()">▶ Generate timelapse</button>
+  <button id="tl-download" style="display:none; width:100%; margin-top:10px; padding:12px;
+    background:var(--green-light); color:var(--green); border:none; border-radius:var(--radius-sm);
+    font-size:15px; font-weight:500; cursor:pointer;" onclick="downloadTimelapse()">
+    ↓ Save GIF to camera roll
+  </button>
+</div>
 <div class="page" id="page-settings">
   <div class="section-title">Auto-capture</div>
   <div class="auto-row">
     <div>
-      <div class="auto-label">Hourly auto-capture</div>
-      <div class="auto-sub" id="auto-sub">Disabled</div>
+      <div class="auto-label">Capture every 30 minutes</div>
+      <div class="auto-sub">Running automatically on server</div>
     </div>
-    <button class="toggle" id="auto-toggle" onclick="toggleAuto()"></button>
+    <span class="badge-pill">Active</span>
   </div>
-
-  <div class="section-title" style="margin-top:20px;">Cameras</div>
-  <div id="cam-settings-list"></div>
-
-  <div class="section-title" style="margin-top:20px;">Data</div>
-  <div class="auto-row" style="flex-direction:column; align-items:flex-start; gap:10px;">
-    <button onclick="captureAll()" style="width:100%; padding:10px; background:var(--blue); color:white; border:none; border-radius:var(--radius-sm); font-size:14px; font-weight:500; cursor:pointer;">Capture all cameras now</button>
-    <button onclick="clearData()" style="width:100%; padding:10px; background:var(--red-light); color:var(--red); border:none; border-radius:var(--radius-sm); font-size:14px; font-weight:500; cursor:pointer;">Clear all snapshot data</button>
+  <div class="section-title">Frame storage</div>
+  <div class="log-card" id="frame-counts" style="padding:0;"></div>
+  <div class="section-title" style="margin-top:20px;">Manual actions</div>
+  <div style="display:flex; flex-direction:column; gap:10px;">
+    <button onclick="captureNow()" style="padding:12px; background:var(--blue); color:white;
+      border:none; border-radius:var(--radius-sm); font-size:14px; font-weight:500; cursor:pointer;">
+      Capture all cameras now
+    </button>
+    <button onclick="clearData()" style="padding:12px; background:var(--red-light); color:var(--red);
+      border:none; border-radius:var(--radius-sm); font-size:14px; font-weight:500; cursor:pointer;">
+      Clear all snapshot data
+    </button>
   </div>
 </div>
-
-<!-- BOTTOM NAV -->
 <nav class="bottomnav">
   <button class="nav-btn active" id="nav-cams" onclick="showPage('cams')">
     <svg viewBox="0 0 24 24"><rect x="2" y="7" width="15" height="11" rx="2"/><path d="M17 9l4-2v10l-4-2"/></svg>
@@ -201,220 +221,167 @@
     <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
     Analysis
   </button>
+  <button class="nav-btn" id="nav-timelapse" onclick="showPage('timelapse')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Timelapse
+  </button>
   <button class="nav-btn" id="nav-settings" onclick="showPage('settings')">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     Settings
   </button>
 </nav>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
-let cams = {};
-let activeCamId = 'yamabiko-top';
-let autoOn = false;
-let autoTimer = null;
-let countdownTimer = null;
-let nextAt = null;
-let chart = null;
-
-// Register service worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
+let cams={},activeCamId='yamabiko-top',countdownTimer=null,nextAt=null,chart=null,currentTlUrl=null;
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}
+async function init(){
+  try{
+    const r=await fetch('/api/cams');cams=await r.json();
+    buildChips();buildTlCamSelect();
+    await refreshCam();await loadSnapshots();await loadStatus();
+    setStatus(true);scheduleCountdown();
+  }catch(e){setStatus(false);}
 }
-
-async function init() {
-  try {
-    const r = await fetch('/api/cams');
-    cams = await r.json();
-    buildChips();
-    buildCamSettings();
-    await refreshCam();
-    await loadSnapshots();
-    setStatus(true);
-  } catch(e) {
-    setStatus(false);
-    document.getElementById('cam-ts').textContent = 'Could not connect to server';
-  }
+function scheduleCountdown(){
+  const interval=30*60*1000;
+  nextAt=Math.ceil(Date.now()/interval)*interval;
+  if(countdownTimer)clearInterval(countdownTimer);
+  countdownTimer=setInterval(()=>{
+    const rem=Math.max(0,nextAt-Date.now());
+    if(rem===0){nextAt=Date.now()+interval;}
+    const m=Math.floor(rem/60000),s=Math.floor((rem%60000)/1000);
+    document.getElementById('s-next').textContent=m+'m '+String(s).padStart(2,'0')+'s';
+  },1000);
 }
-
-function setStatus(ok) {
-  document.getElementById('status-dot').className = 'dot' + (ok ? ' live' : '');
-  document.getElementById('status-text').textContent = ok ? 'Live' : 'Offline';
+function setStatus(ok){
+  document.getElementById('status-dot').className='dot'+(ok?' live':'');
+  document.getElementById('status-text').textContent=ok?'30min auto':'Offline';
 }
-
-function buildChips() {
-  const el = document.getElementById('cam-chips');
-  el.innerHTML = '';
-  Object.entries(cams).forEach(([id, cam]) => {
-    const b = document.createElement('button');
-    b.className = 'cam-chip' + (id === activeCamId ? ' active' : '');
-    b.textContent = cam.label;
-    b.onclick = () => { activeCamId = id; buildChips(); refreshCam(); };
+function buildChips(){
+  const el=document.getElementById('cam-chips');el.innerHTML='';
+  Object.entries(cams).forEach(([id,cam])=>{
+    const b=document.createElement('button');
+    b.className='cam-chip'+(id===activeCamId?' active':'');
+    b.textContent=cam.label;
+    b.onclick=()=>{activeCamId=id;buildChips();refreshCam();};
     el.appendChild(b);
   });
 }
-
-function buildCamSettings() {
-  const el = document.getElementById('cam-settings-list');
-  el.innerHTML = '';
-  Object.entries(cams).forEach(([id, cam]) => {
-    const row = document.createElement('div');
-    row.className = 'auto-row';
-    row.style.marginBottom = '8px';
-    row.style.borderRadius = 'var(--radius)';
-    row.innerHTML = `<div><div class="auto-label">${cam.label}</div><div class="auto-sub">${cam.alt}</div></div>
-      <div class="cam-badge" id="badge-${id}">—</div>`;
-    el.appendChild(row);
+function buildTlCamSelect(){
+  const el=document.getElementById('tl-cam');el.innerHTML='';
+  Object.entries(cams).forEach(([id,cam])=>{
+    const o=document.createElement('option');o.value=id;o.textContent=cam.label;el.appendChild(o);
   });
 }
-
-async function refreshCam() {
-  const img = document.getElementById('cam-img');
-  const ts = Date.now();
-  img.src = `/api/proxy/${activeCamId}?t=${ts}`;
-  document.getElementById('cam-name').textContent = cams[activeCamId]?.label || activeCamId;
-  document.getElementById('cam-alt').textContent = cams[activeCamId]?.alt || '';
-  document.getElementById('cam-ts').textContent = 'Updated ' + new Date(ts).toLocaleTimeString();
+async function refreshCam(){
+  const ts=Date.now();
+  document.getElementById('cam-img').src=`/api/proxy/${activeCamId}?t=${ts}`;
+  document.getElementById('cam-name').textContent=cams[activeCamId]?.label||activeCamId;
+  document.getElementById('cam-alt').textContent=cams[activeCamId]?.alt||'';
+  document.getElementById('cam-ts').textContent='Updated '+new Date(ts).toLocaleTimeString();
   await loadSnapshots();
 }
-
-async function captureAll() {
-  setStatus(true);
-  try {
-    await fetch('/api/capture', { method: 'POST' });
-    await loadSnapshots();
-    await refreshCam();
-  } catch(e) { setStatus(false); }
+async function captureNow(){
+  try{await fetch('/api/capture',{method:'POST'});await loadSnapshots();await refreshCam();await loadStatus();}catch(e){}
 }
-
-async function loadSnapshots() {
-  try {
-    const r = await fetch('/api/snapshots');
-    const snaps = await r.json();
-    updateStats(snaps);
-    updateLog(snaps);
-    updateChart(snaps);
-    updateBadges(snaps);
-  } catch(e) {}
+async function loadSnapshots(){
+  try{const r=await fetch('/api/snapshots');const s=await r.json();updateStats(s);updateLog(s);updateChart(s);}catch(e){}
 }
-
-function updateStats(snaps) {
-  const recent = snaps.slice(-1)[0];
-  document.getElementById('s-count').textContent = snaps.length;
-  if (!recent) return;
-  document.getElementById('s-white').textContent = recent.whiteness + '%';
-  document.getElementById('cam-white').textContent = '❄ ' + recent.whiteness + '%';
-
-  const badge = document.getElementById('badge-' + recent.cam);
-  if (badge) badge.textContent = recent.whiteness + '%';
-
-  if (snaps.length >= 2) {
-    const prev = snaps[snaps.length - 2];
-    const delta = recent.whiteness - prev.whiteness;
-    const el = document.getElementById('s-trend');
-    if (delta < -1) { el.textContent = '↓ Melting'; el.className = 'metric-value melt'; }
-    else if (delta > 1) { el.textContent = '↑ Snowing'; el.className = 'metric-value snow'; }
-    else { el.textContent = '→ Stable'; el.className = 'metric-value stable'; }
+async function loadStatus(){
+  try{const r=await fetch('/api/status');const d=await r.json();updateFrameCounts(d.frame_counts);updateTlFrameInfo(d.frame_counts);}catch(e){}
+}
+function updateStats(snaps){
+  const recent=snaps.slice(-1)[0];
+  document.getElementById('s-count').textContent=snaps.length;
+  if(!recent)return;
+  document.getElementById('s-white').textContent=recent.whiteness+'%';
+  document.getElementById('cam-white').textContent='❄ '+recent.whiteness+'%';
+  if(snaps.length>=2){
+    const delta=recent.whiteness-snaps[snaps.length-2].whiteness;
+    const el=document.getElementById('s-trend');
+    if(delta<-1){el.textContent='↓ Melting';el.className='metric-value melt';}
+    else if(delta>1){el.textContent='↑ Snowing';el.className='metric-value snow';}
+    else{el.textContent='→ Stable';el.className='metric-value stable';}
   }
 }
-
-function updateBadges(snaps) {
-  const latest = {};
-  snaps.forEach(s => { latest[s.cam] = s.whiteness; });
-  Object.entries(latest).forEach(([id, w]) => {
-    const b = document.getElementById('badge-' + id);
-    if (b) b.textContent = w + '%';
-  });
-}
-
-function updateLog(snaps) {
-  const el = document.getElementById('log-list');
-  if (!snaps.length) {
-    el.innerHTML = '<div class="empty">No data yet — tap Capture below</div>';
-    return;
-  }
-  const recent = snaps.slice(-20).reverse();
-  el.innerHTML = recent.map((s, i) => {
-    const prev = recent[i + 1];
-    const delta = prev ? (s.whiteness - prev.whiteness) : null;
-    let deltaHtml = '<span class="log-delta delta-stable">—</span>';
-    if (delta !== null) {
-      if (delta < -1) deltaHtml = `<span class="log-delta delta-melt">${delta.toFixed(1)}%</span>`;
-      else if (delta > 1) deltaHtml = `<span class="log-delta delta-snow">+${delta.toFixed(1)}%</span>`;
-      else deltaHtml = `<span class="log-delta delta-stable">±0</span>`;
+function updateLog(snaps){
+  const el=document.getElementById('log-list');
+  if(!snaps.length){el.innerHTML='<div class="empty">No data yet</div>';return;}
+  const recent=snaps.slice(-20).reverse();
+  el.innerHTML=recent.map((s,i)=>{
+    const prev=recent[i+1];
+    const delta=prev?(s.whiteness-prev.whiteness):null;
+    let dHtml='<span class="log-delta delta-stable">—</span>';
+    if(delta!==null){
+      if(delta<-1)dHtml=`<span class="log-delta delta-melt">${delta.toFixed(1)}%</span>`;
+      else if(delta>1)dHtml=`<span class="log-delta delta-snow">+${delta.toFixed(1)}%</span>`;
+      else dHtml='<span class="log-delta delta-stable">±0</span>';
     }
-    const t = new Date(s.ts);
-    return `<div class="log-row">
-      <div><div class="log-cam">${cams[s.cam]?.label || s.cam}</div><div class="log-time">${t.toLocaleTimeString()}</div></div>
-      <div style="display:flex;align-items:center;gap:8px;"><span class="log-white">${s.whiteness}%</span>${deltaHtml}</div>
-    </div>`;
+    return`<div class="log-row"><div><div class="log-cam">${cams[s.cam]?.label||s.cam}</div><div class="log-time">${new Date(s.ts).toLocaleTimeString()}</div></div><div style="display:flex;align-items:center;gap:8px;"><span style="font-weight:600;">${s.whiteness}%</span>${dHtml}</div></div>`;
   }).join('');
 }
-
-function updateChart(snaps) {
-  if (!snaps.length) return;
-  const camSnaps = snaps.filter(s => s.cam === activeCamId).slice(-24);
-  const labels = camSnaps.map(s => new Date(s.ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}));
-  const data = camSnaps.map(s => s.whiteness);
-
-  if (!chart) {
-    const ctx = document.getElementById('chart').getContext('2d');
-    chart = new Chart(ctx, {
-      type: 'line',
-      data: { labels, datasets: [{ label: 'Whiteness %', data,
-        borderColor: '#1a73e8', backgroundColor: 'rgba(26,115,232,0.08)',
-        tension: 0.3, pointRadius: 3, fill: true }] },
-      options: { responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: { y: { min: 0, max: 100, ticks: { callback: v => v + '%' } },
-                  x: { ticks: { maxTicksLimit: 6 } } } }
+function updateChart(snaps){
+  if(!snaps.length)return;
+  const cs=snaps.filter(s=>s.cam===activeCamId).slice(-48);
+  const labels=cs.map(s=>new Date(s.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));
+  const data=cs.map(s=>s.whiteness);
+  if(!chart){
+    chart=new Chart(document.getElementById('chart').getContext('2d'),{
+      type:'line',data:{labels,datasets:[{label:'Whiteness %',data,borderColor:'#1a73e8',backgroundColor:'rgba(26,115,232,0.08)',tension:0.3,pointRadius:3,fill:true}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}},x:{ticks:{maxTicksLimit:6}}}}
     });
-  } else {
-    chart.data.labels = labels;
-    chart.data.datasets[0].data = data;
-    chart.update();
-  }
+  }else{chart.data.labels=labels;chart.data.datasets[0].data=data;chart.update();}
 }
-
-function toggleAuto() {
-  autoOn = !autoOn;
-  const btn = document.getElementById('auto-toggle');
-  btn.className = 'toggle' + (autoOn ? ' on' : '');
-  if (autoOn) {
-    captureAll();
-    nextAt = Date.now() + 3600000;
-    autoTimer = setInterval(() => { captureAll(); nextAt = Date.now() + 3600000; }, 3600000);
-    countdownTimer = setInterval(() => {
-      if (!nextAt) return;
-      const rem = Math.max(0, nextAt - Date.now());
-      const m = Math.floor(rem / 60000), s = Math.floor((rem % 60000) / 1000);
-      document.getElementById('s-next').textContent = m + 'm ' + String(s).padStart(2,'0') + 's';
-    }, 1000);
-    document.getElementById('auto-sub').textContent = 'On — captures every hour';
-  } else {
-    clearInterval(autoTimer); clearInterval(countdownTimer);
-    autoTimer = null; nextAt = null;
-    document.getElementById('auto-sub').textContent = 'Disabled';
-    document.getElementById('s-next').textContent = '—';
-  }
+function updateFrameCounts(counts){
+  if(!counts)return;
+  document.getElementById('frame-counts').innerHTML=Object.entries(counts).map(([id,n])=>
+    `<div class="log-row"><span>${cams[id]?.label||id}</span><span style="font-weight:600;">${n} frames</span></div>`).join('');
 }
-
-async function clearData() {
-  if (!confirm('Clear all snapshot data?')) return;
-  await fetch('/api/snapshots', { method: 'DELETE' }).catch(() => {});
-  await loadSnapshots();
+function updateTlFrameInfo(counts){
+  if(!counts)return;
+  const camId=document.getElementById('tl-cam').value||activeCamId;
+  const n=counts[camId]||0;
+  document.getElementById('tl-frame-count').textContent=`${n} frames for ${cams[camId]?.label||camId} (~${(n*0.5).toFixed(1)}h coverage)`;
 }
-
-function showPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  document.getElementById('nav-' + name).classList.add('active');
-  if (name === 'stats') loadSnapshots();
+async function generateTimelapse(){
+  const camId=document.getElementById('tl-cam').value;
+  const days=document.getElementById('tl-days').value;
+  const fps=document.getElementById('tl-fps').value;
+  const btn=document.getElementById('tl-btn');
+  btn.disabled=true;btn.textContent='⏳ Building GIF…';
+  document.getElementById('tl-download').style.display='none';
+  const wrap=document.getElementById('tl-gif-wrap');
+  wrap.innerHTML='<div class="tl-placeholder">Building timelapse… this may take 10–30 seconds.</div>';
+  try{
+    const r=await fetch(`/api/timelapse/${camId}?days=${days}&fps=${fps}&t=${Date.now()}`);
+    if(!r.ok){const err=await r.json();wrap.innerHTML=`<div class="tl-placeholder">${err.error}</div>`;}
+    else{
+      currentTlUrl=URL.createObjectURL(await r.blob());
+      wrap.innerHTML=`<img src="${currentTlUrl}" alt="Timelapse GIF"/>`;
+      document.getElementById('tl-download').style.display='block';
+    }
+  }catch(e){wrap.innerHTML='<div class="tl-placeholder">Error generating timelapse. Try again.</div>';}
+  btn.disabled=false;btn.textContent='▶ Generate timelapse';
 }
-
+function downloadTimelapse(){
+  if(!currentTlUrl)return;
+  const a=document.createElement('a');
+  a.href=currentTlUrl;a.download=`nozawa-${document.getElementById('tl-cam').value}-${document.getElementById('tl-days').value}d.gif`;a.click();
+}
+async function clearData(){
+  if(!confirm('Clear all snapshot data?'))return;
+  await fetch('/api/snapshots',{method:'DELETE'}).catch(()=>{});await loadSnapshots();
+}
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  if(name==='stats')loadSnapshots();
+  if(name==='timelapse')loadStatus();
+  if(name==='settings')loadStatus();
+}
 init();
 </script>
 </body>
 </html>
- 
