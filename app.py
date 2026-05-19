@@ -185,7 +185,22 @@ def get_timelapse(cam_id):
         return jsonify({"error": err}), 404
     return send_file(path, mimetype="image/gif",
                      download_name=f"nozawa-{cam_id}-{days}d.gif")
-
+@app.route("/api/download-frames")
+def download_frames():
+    import zipfile, tempfile
+    cam_dir = os.path.join(FRAMES_DIR, "yamabiko")
+    if not os.path.exists(cam_dir):
+        return "No frames found", 404
+    frames = sorted(glob.glob(os.path.join(cam_dir, "*.jpg")))
+    if not frames:
+        return "No frames found", 404
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".zip")
+    with zipfile.ZipFile(tmp.name, "w", zipfile.ZIP_DEFLATED) as zf:
+        for f in frames:
+            zf.write(f, os.path.basename(f))
+    return send_file(tmp.name, mimetype="application/zip",
+                     as_attachment=True,
+                     download_name="yamabiko-frames.zip")
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
