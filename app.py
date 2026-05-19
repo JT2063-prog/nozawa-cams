@@ -6,20 +6,14 @@ import numpy as np
 app = Flask(__name__, static_folder="static", static_url_path="")
 
 CAMS = {
-    "yamabiko-top": {"label": "Kenashi summit", "alt": "1650m", "url": "https://nozawaski.sakura.ne.jp/livecam/yamabiko-top.jpg"},
-    "yamabiko":     {"label": "Yamabiko D",      "alt": "1615m", "url": "https://nozawaski.sakura.ne.jp/livecam/yamabiko.jpg"},
-    "uenotaira":    {"label": "Uenotaira",        "alt": "1407m", "url": "https://nozawaski.sakura.ne.jp/livecam/uenotaira.jpg"},
-    "paradise":     {"label": "Paradise",         "alt": "1230m", "url": "https://nozawaski.sakura.ne.jp/livecam/paradise.jpg"},
-    "hikage":       {"label": "Hikage",           "alt": "660m",  "url": "https://nozawaski.sakura.ne.jp/livecam/hikage.jpg"},
-    "nagasaka":     {"label": "Nagasaka",         "alt": "616m",  "url": "https://nozawaski.sakura.ne.jp/livecam/nagasaka.jpg"},
-    "karasawa":     {"label": "Karasawa",         "alt": "563m",  "url": "https://nozawaski.sakura.ne.jp/livecam/karasawa.jpg"},
+    "yamabiko": {"label": "Yamabiko D", "alt": "1615m", "url": "https://nozawaski.sakura.ne.jp/livecam/yamabiko.jpg"},
 }
 
 HEADERS       = {"Referer": "https://en.nozawaski.com/", "User-Agent": "Mozilla/5.0"}
 DATA_FILE     = "data/snapshots.json"
 FRAMES_DIR    = "data/frames"
 TIMELAPSE_DIR = "data/timelapse"
-CAPTURE_INTERVAL = 1800  # 30 minutes
+CAPTURE_INTERVAL = 1800
 
 for d in ["data", FRAMES_DIR, TIMELAPSE_DIR]:
     os.makedirs(d, exist_ok=True)
@@ -101,20 +95,26 @@ def build_timelapse(cam_id, days=1, fps=8):
         except:
             selected.append(f)
     if len(selected) < 2:
-        return None, f"Only {len(selected)} frame(s) so far — need at least 2. Check back after more captures."
-    images = []
-    for f in selected:
-        try:
-            img = Image.open(f).convert("RGB").resize((480, 270), Image.LANCZOS)
-            images.append(img)
-        except:
-            pass
-    if len(images) < 2:
-        return None, "Could not load enough frames"
+        return None, f"Only {len(selected)} frame(s) in range — need at least 2."
+    MAX_FRAMES = 24
+    if len(selected) > MAX_FRAMES:
+        step = len(selected) // MAX_FRAMES
+        selected = selected[::step][:MAX_FRAMES]
     out_path = os.path.join(TIMELAPSE_DIR, f"{cam_id}_{days}d.gif")
     duration_ms = max(60, int(1000 / fps))
-    images[0].save(out_path, save_all=True, append_images=images[1:],
-                   optimize=False, duration=duration_ms, loop=0)
+    frames = []
+    for f in selected:
+        try:
+            img = Image.open(f).convert("P", palette=Image.ADAPTIVE, colors=64)
+            img = img.resize((320, 180), Image.LANCZOS)
+            frames.append(img)
+        except:
+            pass
+    if len(frames) < 2:
+        return None, "Could not load enough frames"
+    frames[0].save(out_path, save_all=True, append_images=frames[1:],
+                   optimize=True, duration=duration_ms, loop=0)
+    frames.clear()
     return out_path, None
 
 def scheduler():
@@ -185,22 +185,7 @@ def get_timelapse(cam_id):
         return jsonify({"error": err}), 404
     return send_file(path, mimetype="image/gif",
                      download_name=f"nozawa-{cam_id}-{days}d.gif")
-@app.route("/api/download-frames")
-def download_frames():
-    import zipfile, tempfile
-    cam_dir = os.path.join(FRAMES_DIR, "yamabiko")
-    if not os.path.exists(cam_dir):
-        return "No frames found", 404
-    frames = sorted(glob.glob(os.path.join(cam_dir, "*.jpg")))
-    if not frames:
-        return "No frames found", 404
-    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".zip")
-    with zipfile.ZipFile(tmp.name, "w", zipfile.ZIP_DEFLATED) as zf:
-        for f in frames:
-            zf.write(f, os.path.basename(f))
-    return send_file(tmp.name, mimetype="application/zip",
-                     as_attachment=True,
-                     download_name="yamabiko-frames.zip")
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
