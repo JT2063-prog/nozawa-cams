@@ -225,3 +225,171 @@
   <button class="nav-btn" id="nav-stats" onclick="showPage('stats')">
     <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
     Analysis
+  </button>
+  <button class="nav-btn" id="nav-timelapse" onclick="showPage('timelapse')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Timelapse
+  </button>
+  <button class="nav-btn" id="nav-settings" onclick="showPage('settings')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Settings
+  </button>
+</nav>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+let cams={},activeCamId='yamabiko-top',countdownTimer=null,nextAt=null,chart=null,currentTlUrl=null;
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}
+async function init(){
+  try{
+    const r=await fetch('/api/cams');cams=await r.json();
+    buildChips();buildTlCamSelect();
+    await refreshCam();await loadSnapshots();await loadStatus();
+    setStatus(true);scheduleCountdown();
+  }catch(e){setStatus(false);}
+}
+function scheduleCountdown(){
+  const interval=30*60*1000;
+  nextAt=Math.ceil(Date.now()/interval)*interval;
+  if(countdownTimer)clearInterval(countdownTimer);
+  countdownTimer=setInterval(()=>{
+    const rem=Math.max(0,nextAt-Date.now());
+    if(rem===0){nextAt=Date.now()+interval;}
+    const m=Math.floor(rem/60000),s=Math.floor((rem%60000)/1000);
+    document.getElementById('s-next').textContent=m+'m '+String(s).padStart(2,'0')+'s';
+  },1000);
+}
+function setStatus(ok){
+  document.getElementById('status-dot').className='dot'+(ok?' live':'');
+  document.getElementById('status-text').textContent=ok?'30min auto':'Offline';
+}
+function buildChips(){
+  const el=document.getElementById('cam-chips');el.innerHTML='';
+  Object.entries(cams).forEach(([id,cam])=>{
+    const b=document.createElement('button');
+    b.className='cam-chip'+(id===activeCamId?' active':'');
+    b.textContent=cam.label;
+    b.onclick=()=>{activeCamId=id;buildChips();refreshCam();};
+    el.appendChild(b);
+  });
+}
+function buildTlCamSelect(){
+  const el=document.getElementById('tl-cam');el.innerHTML='';
+  Object.entries(cams).forEach(([id,cam])=>{
+    if(cam.timelapse){
+      const o=document.createElement('option');o.value=id;o.textContent=cam.label;el.appendChild(o);
+    }
+  });
+}
+async function refreshCam(){
+  const ts=Date.now();
+  document.getElementById('cam-img').src=`/api/proxy/${activeCamId}?t=${ts}`;
+  document.getElementById('cam-name').textContent=cams[activeCamId]?.label||activeCamId;
+  document.getElementById('cam-alt').textContent=cams[activeCamId]?.alt||'';
+  document.getElementById('cam-ts').textContent='Updated '+new Date(ts).toLocaleTimeString();
+  await loadSnapshots();
+}
+async function captureNow(){
+  try{await fetch('/api/capture',{method:'POST'});await loadSnapshots();await refreshCam();await loadStatus();}catch(e){}
+}
+async function loadSnapshots(){
+  try{const r=await fetch('/api/snapshots');const s=await r.json();updateStats(s);updateLog(s);updateChart(s);}catch(e){}
+}
+async function loadStatus(){
+  try{const r=await fetch('/api/status');const d=await r.json();updateFrameCounts(d.frame_counts);updateTlFrameInfo(d.frame_counts);}catch(e){}
+}
+function updateStats(snaps){
+  const recent=snaps.slice(-1)[0];
+  document.getElementById('s-count').textContent=snaps.length;
+  if(!recent)return;
+  document.getElementById('s-white').textContent=recent.whiteness+'%';
+  document.getElementById('cam-white').textContent='❄ '+recent.whiteness+'%';
+  if(snaps.length>=2){
+    const delta=recent.whiteness-snaps[snaps.length-2].whiteness;
+    const el=document.getElementById('s-trend');
+    if(delta<-1){el.textContent='↓ Melting';el.className='metric-value melt';}
+    else if(delta>1){el.textContent='↑ Snowing';el.className='metric-value snow';}
+    else{el.textContent='→ Stable';el.className='metric-value stable';}
+  }
+}
+function updateLog(snaps){
+  const el=document.getElementById('log-list');
+  if(!snaps.length){el.innerHTML='<div class="empty">No data yet</div>';return;}
+  const recent=snaps.slice(-20).reverse();
+  el.innerHTML=recent.map((s,i)=>{
+    const prev=recent[i+1];
+    const delta=prev?(s.whiteness-prev.whiteness):null;
+    let dHtml='<span class="log-delta delta-stable">—</span>';
+    if(delta!==null){
+      if(delta<-1)dHtml=`<span class="log-delta delta-melt">${delta.toFixed(1)}%</span>`;
+      else if(delta>1)dHtml=`<span class="log-delta delta-snow">+${delta.toFixed(1)}%</span>`;
+      else dHtml='<span class="log-delta delta-stable">±0</span>';
+    }
+    return`<div class="log-row"><div><div class="log-cam">${cams[s.cam]?.label||s.cam}</div><div class="log-time">${new Date(s.ts).toLocaleTimeString()}</div></div><div style="display:flex;align-items:center;gap:8px;"><span style="font-weight:600;">${s.whiteness}%</span>${dHtml}</div></div>`;
+  }).join('');
+}
+function updateChart(snaps){
+  if(!snaps.length)return;
+  const cs=snaps.filter(s=>s.cam===activeCamId).slice(-48);
+  const labels=cs.map(s=>new Date(s.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));
+  const data=cs.map(s=>s.whiteness);
+  if(!chart){
+    chart=new Chart(document.getElementById('chart').getContext('2d'),{
+      type:'line',data:{labels,datasets:[{label:'Whiteness %',data,borderColor:'#1a73e8',backgroundColor:'rgba(26,115,232,0.08)',tension:0.3,pointRadius:3,fill:true}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}},x:{ticks:{maxTicksLimit:6}}}}
+    });
+  }else{chart.data.labels=labels;chart.data.datasets[0].data=data;chart.update();}
+}
+function updateFrameCounts(counts){
+  if(!counts)return;
+  document.getElementById('frame-counts').innerHTML=Object.entries(counts).map(([id,n])=>
+    `<div class="log-row"><span>${cams[id]?.label||id}</span><span style="font-weight:600;">${n} frames</span></div>`).join('');
+}
+function updateTlFrameInfo(counts){
+  if(!counts)return;
+  const camId=document.getElementById('tl-cam').value||'yamabiko';
+  const n=counts[camId]||0;
+  document.getElementById('tl-frame-count').textContent=`${n} frames for Yamabiko D (~${(n*0.5).toFixed(1)}h coverage)`;
+}
+async function generateTimelapse(){
+  const camId=document.getElementById('tl-cam').value||'yamabiko';
+  const days=document.getElementById('tl-days').value;
+  const fps=document.getElementById('tl-fps').value;
+  const btn=document.getElementById('tl-btn');
+  btn.disabled=true;btn.textContent='⏳ Building GIF…';
+  document.getElementById('tl-download').style.display='none';
+  const wrap=document.getElementById('tl-gif-wrap');
+  wrap.innerHTML='<div class="tl-placeholder">Building timelapse… this may take 10–30 seconds.</div>';
+  try{
+    const r=await fetch(`/api/timelapse/${camId}?days=${days}&fps=${fps}&t=${Date.now()}`);
+    if(!r.ok){const err=await r.json();wrap.innerHTML=`<div class="tl-placeholder">${err.error}</div>`;}
+    else{
+      currentTlUrl=URL.createObjectURL(await r.blob());
+      wrap.innerHTML=`<img src="${currentTlUrl}" alt="Timelapse GIF"/>`;
+      document.getElementById('tl-download').style.display='block';
+    }
+  }catch(e){wrap.innerHTML='<div class="tl-placeholder">Error generating timelapse. Try again.</div>';}
+  btn.disabled=false;btn.textContent='▶ Generate timelapse';
+}
+function downloadTimelapse(){
+  if(!currentTlUrl)return;
+  const a=document.createElement('a');
+  a.href=currentTlUrl;a.download=`nozawa-yamabiko-${document.getElementById('tl-days').value}d.gif`;a.click();
+}
+async function clearData(){
+  if(!confirm('Clear all snapshot data?'))return;
+  await fetch('/api/snapshots',{method:'DELETE'}).catch(()=>{});await loadSnapshots();
+}
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  if(name==='stats')loadSnapshots();
+  if(name==='timelapse')loadStatus();
+  if(name==='settings')loadStatus();
+}
+init();
+</script>
+</body>
+</html>
