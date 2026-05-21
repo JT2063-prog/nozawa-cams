@@ -6,14 +6,20 @@ import numpy as np
 app = Flask(__name__, static_folder="static", static_url_path="")
 
 CAMS = {
-    "yamabiko": {"label": "Yamabiko D", "alt": "1615m", "url": "https://nozawaski.sakura.ne.jp/livecam/yamabiko.jpg"},
+    "yamabiko-top": {"label": "Kenashi summit", "alt": "1650m", "url": "https://nozawaski.sakura.ne.jp/livecam/yamabiko-top.jpg", "timelapse": False},
+    "yamabiko":     {"label": "Yamabiko D",      "alt": "1615m", "url": "https://nozawaski.sakura.ne.jp/livecam/yamabiko.jpg",     "timelapse": True},
+    "uenotaira":    {"label": "Uenotaira",        "alt": "1407m", "url": "https://nozawaski.sakura.ne.jp/livecam/uenotaira.jpg",   "timelapse": False},
+    "paradise":     {"label": "Paradise",         "alt": "1230m", "url": "https://nozawaski.sakura.ne.jp/livecam/paradise.jpg",    "timelapse": False},
+    "hikage":       {"label": "Hikage",           "alt": "660m",  "url": "https://nozawaski.sakura.ne.jp/livecam/hikage.jpg",      "timelapse": False},
+    "nagasaka":     {"label": "Nagasaka",         "alt": "616m",  "url": "https://nozawaski.sakura.ne.jp/livecam/nagasaka.jpg",    "timelapse": False},
+    "karasawa":     {"label": "Karasawa",         "alt": "563m",  "url": "https://nozawaski.sakura.ne.jp/livecam/karasawa.jpg",    "timelapse": False},
 }
 
 HEADERS       = {"Referer": "https://en.nozawaski.com/", "User-Agent": "Mozilla/5.0"}
 DATA_FILE     = "data/snapshots.json"
 FRAMES_DIR    = "data/frames"
 TIMELAPSE_DIR = "data/timelapse"
-CAPTURE_INTERVAL = 1800
+CAPTURE_INTERVAL = 1800  # 30 minutes
 
 for d in ["data", FRAMES_DIR, TIMELAPSE_DIR]:
     os.makedirs(d, exist_ok=True)
@@ -48,7 +54,7 @@ def add_overlay(img_bytes, ts_display, cam_label, whiteness):
     draw.text((8, 320), cam_label, fill="white", font=font_b)
     draw.text((8, 340), f"{ts_display}   Snow: {whiteness}%", fill="#aad4ff", font=font_s)
     out = io.BytesIO()
-    img.save(out, format="JPEG", quality=85)
+    img.save(out, format="JPEG", quality=90)
     return out.getvalue()
 
 def save_frame(cam_id, img_bytes, ts_display, whiteness):
@@ -72,7 +78,8 @@ def capture_all():
             r = requests.get(cam["url"], headers=HEADERS, timeout=15)
             r.raise_for_status()
             whiteness = analyse_whiteness(r.content)
-            save_frame(cam_id, r.content, ts_display, whiteness)
+            if cam.get("timelapse"):
+                save_frame(cam_id, r.content, ts_display, whiteness)
             snaps.append({"ts": ts_iso, "cam": cam_id, "whiteness": whiteness})
             print(f"  {cam_id}: {whiteness}%")
         except Exception as e:
@@ -80,6 +87,8 @@ def capture_all():
     save_snapshots(snaps)
 
 def build_timelapse(cam_id, days=1, fps=8):
+    if not CAMS.get(cam_id, {}).get("timelapse"):
+        return None, "Timelapse not enabled for this camera"
     cam_dir = os.path.join(FRAMES_DIR, cam_id)
     if not os.path.exists(cam_dir):
         return None, "No frames captured yet for this camera"
@@ -119,8 +128,13 @@ def build_timelapse(cam_id, days=1, fps=8):
 
 def scheduler():
     while True:
-        print(f"[{datetime.datetime.utcnow().strftime('%H:%M')}] Capturing...")
-        capture_all()
+        now = datetime.datetime.utcnow()
+        jst_hour = (now.hour + 9) % 24
+        if 5 <= jst_hour < 22:
+            print(f"[{now.strftime('%H:%M')} UTC / {jst_hour:02d}:00 JST] Capturing...")
+            capture_all()
+        else:
+            print(f"[{now.strftime('%H:%M')} UTC / {jst_hour:02d}:00 JST] Skipping — night time")
         time.sleep(CAPTURE_INTERVAL)
 
 threading.Thread(target=scheduler, daemon=True).start()
@@ -166,11 +180,15 @@ def api_status():
     for cam_id in CAMS:
         cam_dir = os.path.join(FRAMES_DIR, cam_id)
         frame_counts[cam_id] = len(glob.glob(os.path.join(cam_dir, "*.jpg"))) if os.path.exists(cam_dir) else 0
+    now = datetime.datetime.utcnow()
+    jst_hour = (now.hour + 9) % 24
     return jsonify({
         "snapshots": len(snaps),
         "frame_counts": frame_counts,
         "interval_minutes": CAPTURE_INTERVAL // 60,
-        "last_capture": snaps[-1]["ts"] if snaps else None
+        "last_capture": snaps[-1]["ts"] if snaps else None,
+        "capturing_now": 5 <= jst_hour < 22,
+        "jst_hour": jst_hour
     })
 
 @app.route("/api/timelapse/<cam_id>")
@@ -185,6 +203,23 @@ def get_timelapse(cam_id):
         return jsonify({"error": err}), 404
     return send_file(path, mimetype="image/gif",
                      download_name=f"nozawa-{cam_id}-{days}d.gif")
+
+@app.route("/api/download-frames")
+def download_frames():
+    import zipfile, tempfile
+    cam_dir = os.path.join(FRAMES_DIR, "yamabiko")
+    if not os.path.exists(cam_dir):
+        return "No frames found", 404
+    frames = sorted(glob.glob(os.path.join(cam_dir, "*.jpg")))
+    if not frames:
+        return "No frames found", 404
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".zip")
+    with zipfile.ZipFile(tmp.name, "w", zipfile.ZIP_DEFLATED) as zf:
+        for f in frames:
+            zf.write(f, os.path.basename(f))
+    return send_file(tmp.name, mimetype="application/zip",
+                     as_attachment=True,
+                     download_name="yamabiko-frames.zip")
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
